@@ -1,14 +1,16 @@
 import os
-from fitz import fitz
+from pdf2image import convert_from_path
 from PIL import Image, ImageFont, ImageDraw
 from flask import Flask, request, jsonify
 import json
 app = Flask(__name__)
+
+
 @app.route('/api/adiciona-assinatura', methods=['POST'])
 def adicionaAssinatura():
     try :
         data = request.get_json()
-        d = fitz.open(data['arquivo'])
+        pages = convert_from_path(data['arquivo'], 500)
         
         font = ImageFont.truetype("calibri.ttf", 19)
         text = str(data['token'])+"  "+str(data['data'])+"  "+data['hora']+"  "+ data['ip']
@@ -24,11 +26,9 @@ def adicionaAssinatura():
         drawC.text((273,44), data['data'],(0,0,0),font=font)
 
         image_list = []
-        for i in range(d.pageCount):
-            doc = d.loadPage(i)
-            img = doc.getPixmap(alpha = False, matrix = fitz.Matrix(2, 2))
-            
-            image = Image.frombytes("RGB", [img.width, img.height], img.samples)
+        for page in pages:
+            page.save('page.jpg', 'JPEG')
+            image = Image.open('page.jpg')
             beginTable = image.size[1]
             image = image.crop((0 ,0, image.size[0],image.size[1]+125))
             
@@ -43,6 +43,7 @@ def adicionaAssinatura():
                 first = image
         
         first.save(data['arquivo'].replace('.pdf','-processado.pdf'), "PDF" ,resolution=100.0, quality=95, save_all=True, append_images=image_list)
+        
         response = app.response_class(
             response=json.dumps({"arquivo": data['arquivo'].replace('.pdf','-processado.pdf')}),
             status=200,

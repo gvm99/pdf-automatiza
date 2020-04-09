@@ -1,0 +1,4 @@
+PyMuPDF==1.16.16
+fitz==0.0.1.dev2
+Flask==1.1.1
+Pillow==5.2.0

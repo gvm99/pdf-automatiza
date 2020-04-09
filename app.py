@@ -42,7 +42,7 @@ def adicionaAssinatura():
             else:
                 first = image
         
-        first.save(data['arquivo'].replace('.pdf','-processado.pdf'), "PDF" ,resolution=100.0, save_all=True, append_images=image_list)
+        first.save(data['arquivo'].replace('.pdf','-processado.pdf'), "PDF" ,resolution=100.0, quality=95, save_all=True, append_images=image_list)
         response = app.response_class(
             response=json.dumps({"arquivo": data['arquivo'].replace('.pdf','-processado.pdf')}),
             status=200,
@@ -57,5 +57,5 @@ def adicionaAssinatura():
     return response
 
 if __name__ == "__main__":
-    port = int(os.environ.get('PORT', 5000))
-    app.run(debug=True, host='0.0.0.0', port= port)
+    port = int(os.environ.get('PORT', 3000))
+    app.run(port= port)

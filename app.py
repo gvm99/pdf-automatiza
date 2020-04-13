@@ -15,7 +15,7 @@ def adicionaAssinatura():
         pages = convert_from_path(data['arquivo'], 500)
         textError = "leu"
         textError = "Vai dar erro no texto"
-        font = ImageFont.truetype("calibri.ttf", 19)
+        font = ImageFont.truetype("arial.ttf", 19)
         textError = "Não deu nada"
         text = str(data['token'])+"  "+str(data['data'])+"  "+data['hora']+"  "+ data['ip']
 

@@ -55,7 +55,7 @@ def adicionaAssinatura():
         )
     except Exception as e:
         response = app.response_class(
-            response=json.dumps({"error": str(e)}),
+            response=json.dumps({"error": "OI"+str(e)}),
             status=500,
             mimetype='application/json'
         )

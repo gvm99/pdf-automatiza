@@ -3,6 +3,7 @@ from pdf2image import convert_from_path
 from PIL import Image, ImageFont, ImageDraw
 from flask import Flask, request, jsonify
 import json
+
 app = Flask(__name__)
 
 
@@ -26,9 +27,11 @@ def adicionaAssinatura():
         drawC.text((273,44), data['data'],(0,0,0),font=font)
 
         image_list = []
+        i = 0
         for page in pages:
             page.save('page.jpg', 'JPEG')
             image = Image.open('page.jpg')
+
             beginTable = image.size[1]
             image = image.crop((0 ,0, image.size[0],image.size[1]+125))
             
@@ -41,6 +44,7 @@ def adicionaAssinatura():
                 image_list.append(image)
             else:
                 first = image
+            i = i + 1
         
         first.save(data['arquivo'].replace('.pdf','-processado.pdf'), "PDF" ,resolution=100.0, quality=95, save_all=True, append_images=image_list)
         

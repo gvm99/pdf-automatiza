@@ -9,11 +9,14 @@ app = Flask(__name__)
 
 @app.route('/api/adiciona-assinatura', methods=['POST'])
 def adicionaAssinatura():
+    textError = "não leu"
     try :
         data = request.get_json()
         pages = convert_from_path(data['arquivo'], 500)
-        
+        textError = "leu"
+        textError = "Vai dar erro no texto"
         font = ImageFont.truetype("calibri.ttf", 19)
+        textError = "Não deu nada"
         text = str(data['token'])+"  "+str(data['data'])+"  "+data['hora']+"  "+ data['ip']
 
         table = Image.open('tabelas/tb.jpg')
@@ -55,7 +58,7 @@ def adicionaAssinatura():
         )
     except Exception as e:
         response = app.response_class(
-            response=json.dumps({"error": "OI"+str(e)}),
+            response=json.dumps({"error": textError+str(e)}),
             status=500,
             mimetype='application/json'
         )

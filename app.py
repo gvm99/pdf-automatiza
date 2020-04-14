@@ -11,34 +11,31 @@ app = Flask(__name__)
 def adicionaAssinatura():
     try :
         data = request.get_json()
-        pages = convert_from_path('/anexos/vendaonline/'+data['arquivo'], 500)
-        font = ImageFont.truetype("/home/zemis/pdf-automatiza/calibri.ttf", 19)
-        textError = "Não deu nada"
-        text = str(data['token'])+"  "+str(data['data'])+"  "+data['hora']+"  "+ data['ip']
+        pages = convert_from_path(data['arquivo'], dpi = 100)
+        font = ImageFont.truetype("/home/zemis/pdf-automatiza/calibri.ttf", 14)
+        
+        text = str('/anexos/vendaonline/'+data['token'])+"  "+str(data['data'])+"  "+data['hora']+"  "+ data['ip']
 
         table = Image.open('/home/zemis/pdf-automatiza/tabelas/tb.jpg')
         draw = ImageDraw.Draw(table)
-        draw.text((2433,165), text,(0,0,0),font=font)
-        draw.text((957,165), "  "+data['data'],(0,0,0),font=font)
+        draw.text((487,33), text,(0,0,0),font=font)
+        draw.text((140,33), "  "+data['data'],(0,0,0),font=font)
         
         tableC = Image.open('/home/zemis/pdf-automatiza/tabelas/tb-Capa.jpg')
         drawC = ImageDraw.Draw(tableC)
-        drawC.text((703,45), text,(0,0,0),font=font)
-        drawC.text((273,44), data['data'],(0,0,0),font=font)
+        drawC.text((487,33), text,(0,0,0),font=font)
+        drawC.text((194,33), data['data'],(0,0,0),font=font)
 
         image_list = []
         i = 0
-        for page in pages:
-            page.save('/home/zemis/pdf-automatiza/page.jpg', 'JPEG')
-            image = Image.open('/home/zemis/pdf-automatiza/page.jpg')
-
+        for image in pages:
             beginTable = image.size[1]
-            image = image.crop((0 ,0, image.size[0],image.size[1]+423))
+            image = image.crop((0 ,0, image.size[0],image.size[1]+95))
             
             if i < 4:
-                image.paste(tableC.resize((image.size[0], 423)),(0, beginTable))
+                image.paste(tableC.resize((image.size[0], 95)),(0, beginTable))
             else:
-                image.paste(table.resize((image.size[0], 423)),(0, beginTable))
+                image.paste(table.resize((image.size[0], 95)),(0, beginTable))
 
             if i > 0:
                 image_list.append(image)

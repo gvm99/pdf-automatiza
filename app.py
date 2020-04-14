@@ -9,20 +9,17 @@ app = Flask(__name__)
 
 @app.route('/api/adiciona-assinatura', methods=['POST'])
 def adicionaAssinatura():
-    textError = "não leu"
     try :
         data = request.get_json()
         pages = convert_from_path('/anexos/vendaonline/'+data['arquivo'], 500)
-        textError = "leu"
-        textError = "Vai dar erro no texto"
         font = ImageFont.truetype("/home/zemis/pdf-automatiza/calibri.ttf", 19)
         textError = "Não deu nada"
         text = str(data['token'])+"  "+str(data['data'])+"  "+data['hora']+"  "+ data['ip']
 
         table = Image.open('/home/zemis/pdf-automatiza/tabelas/tb.jpg')
         draw = ImageDraw.Draw(table)
-        draw.text((703,45), text,(0,0,0),font=font)
-        draw.text((273,44), "  "+data['data'],(0,0,0),font=font)
+        draw.text((2433,165), text,(0,0,0),font=font)
+        draw.text((957,165), "  "+data['data'],(0,0,0),font=font)
         
         tableC = Image.open('/home/zemis/pdf-automatiza/tabelas/tb-Capa.jpg')
         drawC = ImageDraw.Draw(tableC)
@@ -36,12 +33,12 @@ def adicionaAssinatura():
             image = Image.open('/home/zemis/pdf-automatiza/page.jpg')
 
             beginTable = image.size[1]
-            image = image.crop((0 ,0, image.size[0],image.size[1]+125))
+            image = image.crop((0 ,0, image.size[0],image.size[1]+423))
             
             if i < 4:
-                image.paste(tableC.resize((image.size[0], 125)),(0, beginTable))
+                image.paste(tableC.resize((image.size[0], 423)),(0, beginTable))
             else:
-                image.paste(table.resize((image.size[0], 125)),(0, beginTable))
+                image.paste(table.resize((image.size[0], 423)),(0, beginTable))
 
             if i > 0:
                 image_list.append(image)

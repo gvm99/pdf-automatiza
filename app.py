@@ -11,10 +11,10 @@ app = Flask(__name__)
 def adicionaAssinatura():
     try :
         data = request.get_json()
-        pages = convert_from_path(data['arquivo'], dpi = 100)
+        pages = convert_from_path('/anexos/vendaonline/'+data['arquivo'], dpi = 100)
         font = ImageFont.truetype("/home/zemis/pdf-automatiza/calibri.ttf", 14)
         
-        text = str('/anexos/vendaonline/'+data['token'])+"  "+str(data['data'])+"  "+data['hora']+"  "+ data['ip']
+        text = str(data['token'])+"  "+str(data['data'])+"  "+data['hora']+"  "+ data['ip']
 
         table = Image.open('/home/zemis/pdf-automatiza/tabelas/tb.jpg')
         draw = ImageDraw.Draw(table)

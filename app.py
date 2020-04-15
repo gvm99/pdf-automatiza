@@ -12,16 +12,16 @@ def adicionaAssinatura():
     try :
         data = request.get_json()
         pages = convert_from_path('/anexos/vendaonline/'+data['arquivo'], dpi = 100)
-        font = ImageFont.truetype("/home/zemis/pdf-automatiza/calibri.ttf", 14)
+        font = ImageFont.truetype("/srv/srv-python/pdf-automatiza/calibri.ttf", 14)
         
         text = str(data['token'])+"  "+str(data['data'])+"  "+data['hora']+"  "+ data['ip']
 
-        table = Image.open('/home/zemis/pdf-automatiza/tabelas/tb.jpg')
+        table = Image.open('/srv/srv-python/pdf-automatiza/tabelas/tb.jpg')
         draw = ImageDraw.Draw(table)
         draw.text((487,33), text,(0,0,0),font=font)
         draw.text((194,33), "  "+data['data'],(0,0,0),font=font)
         
-        tableC = Image.open('/home/zemis/pdf-automatiza/tabelas/tb-Capa.jpg')
+        tableC = Image.open('/srv/srv-python/pdf-automatiza/tabelas/tb-Capa.jpg')
         drawC = ImageDraw.Draw(tableC)
         drawC.text((487,33), text,(0,0,0),font=font)
         drawC.text((194,33), data['data'],(0,0,0),font=font)

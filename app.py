@@ -19,7 +19,7 @@ def adicionaAssinatura():
         table = Image.open('/home/zemis/pdf-automatiza/tabelas/tb.jpg')
         draw = ImageDraw.Draw(table)
         draw.text((487,33), text,(0,0,0),font=font)
-        draw.text((140,33), "  "+data['data'],(0,0,0),font=font)
+        draw.text((194,33), "  "+data['data'],(0,0,0),font=font)
         
         tableC = Image.open('/home/zemis/pdf-automatiza/tabelas/tb-Capa.jpg')
         drawC = ImageDraw.Draw(tableC)
@@ -31,7 +31,7 @@ def adicionaAssinatura():
         for image in pages:
             beginTable = image.size[1]
             image = image.crop((0 ,0, image.size[0],image.size[1]+95))
-            
+
             if i < 4:
                 image.paste(tableC.resize((image.size[0], 95)),(0, beginTable))
             else:
@@ -42,11 +42,12 @@ def adicionaAssinatura():
             else:
                 first = image
             i = i + 1
-        
+
         first.save('/anexos/vendaonline/'+data['arquivo'].replace('.pdf','-processado.pdf'), "PDF" ,resolution=100.0, quality=95, save_all=True, append_images=image_list)
-        
+        pages = convert_from_path('/anexos/vendaonline/'+data['arquivo'].replace('.pdf','-processado.pdf'), dpi = 100)
+
         response = app.response_class(
-            response=json.dumps({"arquivo": data['arquivo'].replace('.pdf','-processado.pdf')}),
+            response=json.dumps({"arquivo": data['arquivo'].replace('.pdf','-processado.pdf'),"quantidade":str(len(pages))}),
             status=200,
             mimetype='application/json'
         )

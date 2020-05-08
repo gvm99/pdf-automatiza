@@ -44,10 +44,10 @@ def adicionaAssinatura():
             i = i + 1
 
         first.save('/anexos/vendaonline/'+data['arquivo'].replace('.pdf','-processado.pdf'), "PDF" ,resolution=100.0, quality=95, save_all=True, append_images=image_list)
-        pages = convert_from_path('/anexos/vendaonline/'+data['arquivo'].replace('.pdf','-processado.pdf'), dpi = 100)
+        #pages = convert_from_path('/anexos/vendaonline/'+data['arquivo'].replace('.pdf','-processado.pdf'), dpi = 100)
 
         response = app.response_class(
-            response=json.dumps({"arquivo": data['arquivo'].replace('.pdf','-processado.pdf'),"quantidade":str(len(pages))}),
+            response=json.dumps({"arquivo": data['arquivo'].replace('.pdf','-processado.pdf')}),
             status=200,
             mimetype='application/json'
         )

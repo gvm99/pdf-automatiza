@@ -64,7 +64,7 @@ def adicionaRetificacao():
     try :
         data = request.get_json()
         pages = convert_from_path('/anexos/vendaonline/'+data['arquivo'], dpi = 100)
-        table = Image.open('/home/zemis/pdf-automatiza/tabelas/tb.jpg')
+        table = Image.open('/home/zemis/pdf-automatiza/tabelas/tb-ret.jpg')
         font = ImageFont.truetype("/home/zemis/pdf-automatiza/calibri.ttf", 14)
         h = 33
         toCrop = 23*(len(data['assinaturas']) - 3)

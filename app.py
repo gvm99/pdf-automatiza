@@ -11,7 +11,7 @@ app = Flask(__name__)
 def adicionaAssinatura():
     try :
         data = request.get_json()
-        pages = convert_from_path('/anexos/vendaonline/'+data['arquivo'], dpi = 100)
+        pages = convert_from_path('/anexos/vendaonline/'+data['arquivo'].replace('-processado',''), dpi = 100)
         font = ImageFont.truetype("/home/zemis/pdf-automatiza/calibri.ttf", 14)
         
         text = str(data['token'])+"  "+str(data['data'])+"  "+data['hora']+"  "+ data['ip']
@@ -19,12 +19,12 @@ def adicionaAssinatura():
         table = Image.open('/home/zemis/pdf-automatiza/tabelas/tb.jpg')
         draw = ImageDraw.Draw(table)
         draw.text((487,33), text,(0,0,0),font=font)
-        draw.text((194,33), "  "+data['data'],(0,0,0),font=font)
+        draw.text((200,33), "  "+data['data'],(0,0,0),font=font)
         
-        tableC = Image.open('/home/zemis/pdf-automatiza/tabelas/tb-Capa.jpg')
+        tableC = Image.open('/home/zemis/pdf-automatiza/tabelas/tb.jpg')
         drawC = ImageDraw.Draw(tableC)
         drawC.text((487,33), text,(0,0,0),font=font)
-        drawC.text((194,33), data['data'],(0,0,0),font=font)
+        drawC.text((200,33), data['data'],(0,0,0),font=font)
 
         image_list = []
         i = 0
@@ -43,11 +43,11 @@ def adicionaAssinatura():
                 first = image
             i = i + 1
 
-        first.save('/anexos/vendaonline/'+data['arquivo'].replace('.pdf','-processado.pdf'), "PDF" ,resolution=100.0, quality=95, save_all=True, append_images=image_list)
+        first.save('/anexos/vendaonline/'+data['arquivo'].replace("-processado",'').replace('.pdf','-processado.pdf'), "PDF" ,resolution=100.0, quality=95, save_all=True, append_images=image_list)
         #pages = convert_from_path('/anexos/vendaonline/'+data['arquivo'].replace('.pdf','-processado.pdf'), dpi = 100)
 
         response = app.response_class(
-            response=json.dumps({"arquivo": data['arquivo'].replace('.pdf','-processado.pdf')}),
+            response=json.dumps({"arquivo": data['arquivo'].replace("-processado",'').replace('.pdf','-processado.pdf')}),
             status=200,
             mimetype='application/json'
         )

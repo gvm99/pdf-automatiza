@@ -6,45 +6,72 @@ import json
 
 app = Flask(__name__)
 
+def numerar(numeroAtual, total):
+  #/home/zemis/pdf-automatiza/
+  #/anexos/vendaonline/
+  pathOfEnv = ""
+  
+  numeracao = Image.open(pathOfEnv+'tabelas/numeracao.jpg')
+  font = ImageFont.truetype(pathOfEnv+"calibri.ttf", 14)
+
+  drawnumeracao = ImageDraw.Draw(numeracao)
+  if len(numeroAtual)  == 1:
+       drawnumeracao.text((839, 9), numeroAtual,(0,0,0),font=font)
+  elif len(numeroAtual) == 2:
+       drawnumeracao.text((835, 9), numeroAtual,(0,0,0),font=font)
+  else:
+       drawnumeracao.text((831, 9), numeroAtual,(0,0,0),font=font)
+  drawnumeracao.text((863, 9), total,(0,0,0),font=font)
+
+  return numeracao
 
 @app.route('/api/adiciona-assinatura', methods=['POST'])
 def adicionaAssinatura():
     try :
+        #LISTA DE PATHS
+        #/home/zemis/pdf-automatiza/
+        #/anexos/vendaonline/
+        pathOfEnv = ""
+        pathOfFile = ""
+
         data = request.get_json()
-        pages = convert_from_path('/anexos/vendaonline/'+data['arquivo'], dpi = 100)
-        font = ImageFont.truetype("/home/zemis/pdf-automatiza/calibri.ttf", 14)
+        pages = convert_from_path(pathOfFile + data['arquivo'], dpi = 100)
+        font = ImageFont.truetype(pathOfEnv+"calibri.ttf", 14)
         
         text = str(data['token'])+"  "+str(data['data'])+"  "+data['hora']+"  "+ data['ip']
 
-        table = Image.open('/home/zemis/pdf-automatiza/tabelas/tb.jpg')
+        table = Image.open(pathOfEnv+'tabelas/tb.jpg')
         draw = ImageDraw.Draw(table)
         draw.text((487,33), text,(0,0,0),font=font)
-        draw.text((194,33), "  "+data['data'],(0,0,0),font=font)
+        draw.text((200,33), "  "+data['data'],(0,0,0),font=font)
         
-        tableC = Image.open('/home/zemis/pdf-automatiza/tabelas/tb-Capa.jpg')
+        tableC = Image.open(pathOfEnv+'tabelas/tb-Capa.jpg')
         drawC = ImageDraw.Draw(tableC)
         drawC.text((487,33), text,(0,0,0),font=font)
-        drawC.text((194,33), data['data'],(0,0,0),font=font)
+        drawC.text((200,33), data['data'],(0,0,0),font=font)
 
         image_list = []
         i = 0
         for image in pages:
             beginTable = image.size[1]
-            image = image.crop((0 ,0, image.size[0],image.size[1]+95))
+            numeracao = numerar(str(i+1), str(len(pages)))
 
+            image = image.crop((0 ,0, image.size[0], image.size[1]+124))
+            
             if i < 4:
                 image.paste(tableC.resize((image.size[0], 95)),(0, beginTable))
             else:
                 image.paste(table.resize((image.size[0], 95)),(0, beginTable))
-
+            
+            image.paste(numeracao.resize((image.size[0], 25)),(0, beginTable+95))
             if i > 0:
                 image_list.append(image)
             else:
                 first = image
             i = i + 1
 
-        first.save('/anexos/vendaonline/'+data['arquivo'].replace('.pdf','-processado.pdf'), "PDF" ,resolution=100.0, quality=95, save_all=True, append_images=image_list)
-        #pages = convert_from_path('/anexos/vendaonline/'+data['arquivo'].replace('.pdf','-processado.pdf'), dpi = 100)
+        first.save(pathOfFile + data['arquivo'].replace('.pdf','-processado.pdf'), "PDF" ,resolution=100.0, quality=95, save_all=True, append_images=image_list)
+      
 
         response = app.response_class(
             response=json.dumps({"arquivo": data['arquivo'].replace('.pdf','-processado.pdf')}),
@@ -59,53 +86,38 @@ def adicionaAssinatura():
         )
     return response
 
-@app.route('/api/adiciona-retificacao', methods=['POST'])
-def adicionaRetificacao():
+@app.route('/api/adiciona-paginacao', methods=['POST'])
+def adicionaPaginacao():
     try :
+        #LISTA DE PATHS
+        #/home/zemis/pdf-automatiza/
+        #/anexos/vendaonline/
+        pathOfEnv = ""
+        pathOfFile = ""
+
         data = request.get_json()
-        pages = convert_from_path(data['arquivo'], dpi = 100)
-        table = Image.open('tabelas/tb.jpg')
-        font = ImageFont.truetype("calibri.ttf", 14)
-        h = 33
-        toCrop = 23*(len(data['assinaturas']) - 3)
-        endOfImage = table.size[1]
-
-        table = table.crop((0 ,0, table.size[0], endOfImage + toCrop + 10))
-        bg = Image.new('RGB', (table.size[0], endOfImage + toCrop + 10), (255, 255, 255))
-        table.paste(bg, (0, endOfImage))
-        draw = ImageDraw.Draw(table)
-
-        draw.line([23,4,23,endOfImage + toCrop], fill='#E4E1E0')
-        draw.line([803,4,803,endOfImage + toCrop], fill='#E4E1E0')
-        draw.line([414,25,414,endOfImage + toCrop], fill='#E4E1E0')
-
-        draw.line([23, endOfImage + toCrop, 803, endOfImage + toCrop], fill='#E4E1E0')
-
-        for d in data['assinaturas']:
-            draw.text((30,h), d['c1'],(0,0,0),font=font)
-            draw.text((421,h), d['c2'],(0,0,0),font=font)
-            h = h + 23
+        pages = convert_from_path(pathOfFile + data['arquivo'], dpi = 100)
 
         image_list = []
         i = 0
         for image in pages:
-            beginTable = image.size[1]
-            image = image.crop((0 ,0, image.size[0],image.size[1]+table.size[1]))
-
-            image.paste(table.resize((image.size[0], table.size[1])),(0, beginTable))
+           
+            numeracao = numerar(str(i+1), str(len(pages)))
             
-
+            image = image.crop((0 ,0, image.size[0], image.size[1]+25))
+            
+            image.paste(numeracao.resize((image.size[0], 25)),(0, image.size[1] - 25))
             if i > 0:
                 image_list.append(image)
             else:
                 first = image
             i = i + 1
 
-        first.save(data['arquivo'].replace('.pdf','-processado.pdf'), "PDF" ,resolution=100.0, quality=95, save_all=True, append_images=image_list)
-        pages = convert_from_path(data['arquivo'].replace('.pdf','-processado.pdf'), dpi = 100)
+        first.save(pathOfFile + data['arquivo'].replace('.pdf','-processado.pdf'), "PDF" ,resolution=100.0, quality=95, save_all=True, append_images=image_list)
+      
 
         response = app.response_class(
-            response=json.dumps({"arquivo": data['arquivo'].replace('.pdf','-processado.pdf'),"quantidade":str(len(pages))}),
+            response=json.dumps({"arquivo": data['arquivo'].replace('.pdf','-processado.pdf')}),
             status=200,
             mimetype='application/json'
         )

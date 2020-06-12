@@ -74,7 +74,7 @@ def adicionaAssinatura():
       
 
         response = app.response_class(
-            response=json.dumps({"arquivo": data['arquivo'].replace('.pdf','-processado.pdf')}),
+            response=json.dumps({"arquivo": data['arquivo'].replace("-processado",'').replace('.pdf','-processado.pdf')}),
             status=200,
             mimetype='application/json'
         )

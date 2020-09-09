@@ -3,15 +3,14 @@ from pdf2image import convert_from_path
 from PIL import Image, ImageFont, ImageDraw
 from flask import Flask, request, jsonify
 import json
-from datetime import datetime
 
 app = Flask(__name__)
 
 def numerar(numeroAtual, total):
   #/home/zemis/pdf-automatiza/
   #/anexos/vendaonline/
-  #/srv/srv-python/pdf-automatiza
-  pathOfEnv = "/srv/srv-python/pdf-automatiza/"
+  #
+  pathOfEnv = ""
 
   numeracao = Image.open(pathOfEnv+'tabelas/numeracao.jpg')
   font = ImageFont.truetype(pathOfEnv+"calibri.ttf", 14)
@@ -33,14 +32,10 @@ def adicionaAssinatura():
         #LISTA DE PATHS
         #/home/zemis/pdf-automatiza/
         #/anexos/vendaonline/
-        #/srv/srv-python/pdf-automatiza
-        pathOfEnv = "/srv/srv-python/pdf-automatiza/"
-        pathOfFile = "/anexos/vendaonline/"
+        pathOfEnv = ""
+        pathOfFile = ""
 
         data = request.get_json()
-        if '-procassin' in data['arquivo']:
-            data['arquivo'] = data['arquivo'].split('-procassin')[0] + '.pdf'
-
         pages = convert_from_path(pathOfFile + data['arquivo'], dpi = 100)
         font = ImageFont.truetype(pathOfEnv+"calibri.ttf", 14)
         
@@ -75,13 +70,12 @@ def adicionaAssinatura():
             else:
                 first = image
             i = i + 1
-	
-        str_processado = '-procassin'+datetime.now().strftime('%d%m%Y%H%M%S')
-        first.save(pathOfFile + data['arquivo'].replace('.pdf',str_processado+'.pdf'), "PDF" ,resolution=100.0, quality=95, save_all=True, append_images=image_list)
+
+        first.save(pathOfFile + data['arquivo'].replace('.pdf','-processado.pdf'), "PDF" ,resolution=100.0, quality=95, save_all=True, append_images=image_list)
       
 
         response = app.response_class(
-            response=json.dumps({"arquivo": data['arquivo'].replace('.pdf',str_processado+'.pdf')}),
+            response=json.dumps({"arquivo": data['arquivo'].replace("-processado",'').replace('.pdf','-processado.pdf')}),
             status=200,
             mimetype='application/json'
         )
@@ -99,9 +93,8 @@ def adicionaPaginacao():
         #LISTA DE PATHS
         #/home/zemis/pdf-automatiza/
         #/anexos/vendaonline/
-        #/srv/srv-python/pdf-automatiza/
-        pathOfEnv = "/srv/srv-python/pdf-automatiza/"
-        pathOfFile = "/anexos/vendaonline/"
+        pathOfEnv = ""
+        pathOfFile = ""
 
         data = request.get_json()
         pages = convert_from_path(pathOfFile + data['arquivo'], dpi = 100)
@@ -121,12 +114,11 @@ def adicionaPaginacao():
                 first = image
             i = i + 1
 
-        str_processado = 'pag'+datetime.now().strftime('%d%m%Y%H%M%S')
-        first.save(pathOfFile + data['arquivo'].replace('.pdf',str_processado+'.pdf'), "PDF" ,resolution=100.0, quality=95, save_all=True, append_images=image_list)
+        first.save(pathOfFile + data['arquivo'].replace('.pdf','-processado.pdf'), "PDF" ,resolution=100.0, quality=95, save_all=True, append_images=image_list)
       
 
         response = app.response_class(
-            response=json.dumps({"arquivo": data['arquivo'].replace('.pdf',str_processado+'.pdf')}),
+            response=json.dumps({"arquivo": data['arquivo'].replace('.pdf','-processado.pdf')}),
             status=200,
             mimetype='application/json'
         )

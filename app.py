@@ -2,6 +2,9 @@ import os
 from pdf2image import convert_from_path
 from PIL import Image, ImageFont, ImageDraw
 from flask import Flask, request, jsonify
+import pickle
+import pandas as pd
+import numpy as np
 import json
 from datetime import datetime
 
@@ -26,6 +29,39 @@ def numerar(numeroAtual, total):
   drawnumeracao.text((863, 9), total,(0,0,0),font=font)
 
   return numeracao
+
+
+def prepareData(data):
+    dfCid = pd.read_pickle('/srv/srv-python/pdf-automatiza/filesLeitos/dC.pickle')
+    dfPrestadorCid = pd.read_pickle('/srv/srv-python/pdf-automatiza/filesLeitos/dPreC.pickle')
+    dfProcedimentoCid = pd.read_pickle('/srv/srv-python/pdf-automatiza/filesLeitos/dProC.pickle')
+
+    prestador_cid = data['CD_PRESTADOR']+"-"+data['CD_CID']
+    pro_cid = data['CD_CID']+"-"+data['CD_PRO_INT']
+    sexo = 0 if data['TP_SEXO'] == 'M' else 1
+    
+    cid = dfCid[dfCid['CD_CID'] == data['CD_CID']]['y'].values[0]
+    
+    try:
+        preCid = dfPrestadorCid[dfPrestadorCid['PRESTADOR_CID'] == prestador_cid]['y'].values[0]
+    except:
+        preCid = cid
+    
+    if preCid != preCid:
+        preCid = cid
+
+    try:
+        proCid = dfProcedimentoCid[dfProcedimentoCid['PRO_CID'] == pro_cid]['y'].values[0]
+    except:
+        proCid = (preCid + cid) / 2
+
+    if proCid != proCid:
+        proCid = (preCid + cid) / 2
+    
+    if cid != cid:
+        return [[np.nan,np.nan,np.nan,np.nan]]
+
+    return [[sexo, cid, proCid, preCid]]
 
 @app.route('/api/adiciona-assinatura', methods=['POST'])
 def adicionaAssinatura():
@@ -136,6 +172,27 @@ def adicionaPaginacao():
             status=500,
             mimetype='application/json'
         )
+    return response
+
+@app.route('/previsao-leitos/dias', methods=['POST'])
+def home():
+    data = request.get_json()
+    model = pickle.load(open('/srv/srv-python/pdf-automatiza/filesLeitos/model.pickle', 'rb'))
+    try:
+        previsaoAlta = round(model.predict(prepareData(data))[0], 0)
+        response = app.response_class(
+            response=json.dumps({"DiasPrevistos": previsaoAlta}),
+            status=200,
+            mimetype='application/json'
+        )
+    except:
+        response = app.response_class(
+            response=json.dumps({"err": "Massa de dados insuficiente"}),
+            status=500,
+            mimetype='application/json'
+        )
+
+    
     return response
 
 if __name__ == "__main__":

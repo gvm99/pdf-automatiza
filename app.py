@@ -14,8 +14,8 @@ def numerar(numeroAtual, total):
   #/home/zemis/pdf-automatiza/
   #/anexos/vendaonline/
   #/srv/srv-python/pdf-automatiza
-  pathOfEnv = "/srv/srv-python/pdf-automatiza/"
-
+  #pathOfEnv = "/srv/srv-python/pdf-automatiza/"
+  pathOfEnv = "/home/zemis/pdf-automatiza/"
   numeracao = Image.open(pathOfEnv+'tabelas/numeracao.jpg')
   font = ImageFont.truetype(pathOfEnv+"calibri.ttf", 14)
 

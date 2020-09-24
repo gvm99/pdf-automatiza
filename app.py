@@ -226,6 +226,8 @@ def identidade():
     fileImg = request.files['file']
     fileImg.save('images/'+fileImg.filename)
     try:
+        fileImg = request.files['file']
+        fileImg.save('images/'+fileImg.filename)
         response = {}
 
         response['positions'], response['quantity']  = getIdentidade(fileImg.filename)

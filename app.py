@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import json
 from datetime import datetime
+import dlib
 
 app = Flask(__name__)
 
@@ -62,6 +63,31 @@ def prepareData(data):
         return [[np.nan,np.nan,np.nan,np.nan]]
 
     return [[sexo, cid, proCid, preCid]]
+
+def getIdentidade(imageFile):
+    detector = dlib.simple_object_detector("detector.svm")
+    f = '/home/zemis/pdf-automatiza/images/'+imageFile
+    # f = 'images/'+imageFile
+    
+    print("Processing file: {}".format(f))
+    for i in range(0,4):
+        transImage  = Image.open(f)
+        transposed  = transImage.transpose(Image.ROTATE_90)
+        transposed.save(f)
+        img = dlib.load_rgb_image(f)
+        dets = detector(img)
+        
+        positions = []
+        position = {}
+        for k, d in enumerate(dets):
+            position['left'], position['top'], position['right'], position['bottom'] = d.left(), d.top(), d.right(), d.bottom()
+            positions.append(position)
+        
+        if len(positions) > 0:
+            return positions, len(positions)
+
+
+    return [], 0
 
 @app.route('/api/adiciona-assinatura', methods=['POST'])
 def adicionaAssinatura():
@@ -188,6 +214,30 @@ def home():
     except:
         response = app.response_class(
             response=json.dumps({"err": "Massa de dados insuficiente"}),
+            status=500,
+            mimetype='application/json'
+        )
+
+    
+    return response
+
+@app.route('/find/identidade', methods=['POST'])
+def identidade():
+    fileImg = request.files['file']
+    fileImg.save('images/'+fileImg.filename)
+    try:
+        response = {}
+
+        response['positions'], response['quantity']  = getIdentidade(fileImg.filename)
+        
+        response = app.response_class(
+            response=json.dumps(response),
+            status=200,
+            mimetype='application/json'
+        )
+    except Exception as e:
+        response = app.response_class(
+            response=json.dumps({"err": "Não reconhecido. "+ str(e)}),
             status=500,
             mimetype='application/json'
         )

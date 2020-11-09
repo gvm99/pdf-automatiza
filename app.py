@@ -7,7 +7,6 @@ import pandas as pd
 import numpy as np
 import json
 from datetime import datetime
-import dlib
 
 app = Flask(__name__)
 
@@ -63,31 +62,6 @@ def prepareData(data):
         return [[np.nan,np.nan,np.nan,np.nan]]
 
     return [[sexo, cid, proCid, preCid]]
-
-def getIdentidade(imageFile):
-    detector = dlib.simple_object_detector("detector.svm")
-    f = '/home/zemis/pdf-automatiza/images/'+imageFile
-    # f = 'images/'+imageFile
-    
-    print("Processing file: {}".format(f))
-    for i in range(0,4):
-        transImage  = Image.open(f)
-        transposed  = transImage.transpose(Image.ROTATE_90)
-        transposed.save(f)
-        img = dlib.load_rgb_image(f)
-        dets = detector(img)
-        
-        positions = []
-        position = {}
-        for k, d in enumerate(dets):
-            position['left'], position['top'], position['right'], position['bottom'] = d.left(), d.top(), d.right(), d.bottom()
-            positions.append(position)
-        
-        if len(positions) > 0:
-            return positions, len(positions)
-
-
-    return [], 0
 
 @app.route('/api/adiciona-assinatura', methods=['POST'])
 def adicionaAssinatura():
@@ -221,30 +195,64 @@ def home():
     
     return response
 
-@app.route('/find/identidade', methods=['POST'])
-def identidade():
-    fileImg = request.files['file']
-    fileImg.save('images/'+fileImg.filename)
-    try:
-        fileImg = request.files['file']
-        fileImg.save('images/'+fileImg.filename)
-        response = {}
+@app.route('/api/adiciona-retificacao', methods=['POST'])
+def adicionaRetificacao():
+    try :
+        data = request.get_json()
+        pages = convert_from_path(data['arquivo'], dpi = 100)
+        table = Image.open('tabelas/tbPj.jpg')
+        font = ImageFont.truetype("calibri.ttf", 14)
+        h = 33
+        toCrop = 23*(len(data['assinaturas']) - 3)
+        endOfImage = table.size[1]
 
-        response['positions'], response['quantity']  = getIdentidade(fileImg.filename)
-        
+        table = table.crop((0 ,0, table.size[0], endOfImage + toCrop + 10))
+        bg = Image.new('RGB', (table.size[0], endOfImage + toCrop + 10), (255, 255, 255))
+        table.paste(bg, (0, endOfImage))
+        draw = ImageDraw.Draw(table)
+
+        draw.line([23,4,23,endOfImage + toCrop], fill='#E4E1E0')
+        draw.line([803,4,803,endOfImage + toCrop], fill='#E4E1E0')
+        draw.line([414,25,414,endOfImage + toCrop], fill='#E4E1E0')
+
+        draw.line([23, endOfImage + toCrop, 803, endOfImage + toCrop], fill='#E4E1E0')
+
+        for d in data['assinaturas']:
+            strLeft = "CPF: "+d['cpfResponsavel']+"     Local e Data: Volta Redonda "+d['data']
+            strRight = "Assinatura: "+d['token']+" "+d['data']+" "+d['hora']+" "+d['ip']
+            draw.text((30,h), strLeft,(0,0,0),font=font)
+            draw.text((421,h), strRight,(0,0,0),font=font)
+            h = h + 23
+
+        image_list = []
+        i = 0
+        for image in pages:
+            beginTable = image.size[1]
+            image = image.crop((0 ,0, image.size[0],image.size[1]+table.size[1]))
+
+            image.paste(table.resize((image.size[0], table.size[1])),(0, beginTable))
+
+
+            if i > 0:
+                image_list.append(image)
+            else:
+                first = image
+            i = i + 1
+
+        first.save(data['arquivo'].replace('.pdf','-processado.pdf'), "PDF" ,resolution=100.0, quality=95, save_all=True, append_images=image_list)
+        pages = convert_from_path(data['arquivo'].replace('.pdf','-processado.pdf'), dpi = 100)
+
         response = app.response_class(
-            response=json.dumps(response),
+            response=json.dumps({"arquivo": data['arquivo'].replace('.pdf','-processado.pdf'),"quantidade":str(len(pages))}),
             status=200,
             mimetype='application/json'
         )
     except Exception as e:
         response = app.response_class(
-            response=json.dumps({"err": "Não reconhecido. "+ str(e)}),
+            response=json.dumps({"error": str(e) }),
             status=500,
             mimetype='application/json'
         )
-
-    
     return response
 
 if __name__ == "__main__":

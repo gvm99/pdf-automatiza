@@ -195,13 +195,13 @@ def home():
     
     return response
 
-@app.route('/api/adiciona-retificacao', methods=['POST'])
-def adicionaRetificacao():
+@app.route('/api/adiciona-pj', methods=['POST'])
+def adicionaPj():
     try :
         data = request.get_json()
         pages = convert_from_path(data['arquivo'], dpi = 100)
-        table = Image.open('tabelas/tbPj.jpg')
-        font = ImageFont.truetype("calibri.ttf", 14)
+        table = Image.open('/home/zemis/pdf-automatiza/tabelas/tbPj.jpg')
+        font = ImageFont.truetype("/home/zemis/pdf-automatiza/calibri.ttf", 14)
         h = 33
         toCrop = 23*(len(data['assinaturas']) - 3)
         endOfImage = table.size[1]
@@ -232,15 +232,15 @@ def adicionaRetificacao():
 
             image.paste(table.resize((image.size[0], table.size[1])),(0, beginTable))
 
-
             if i > 0:
                 image_list.append(image)
             else:
                 first = image
             i = i + 1
-
-        first.save(data['arquivo'].replace('.pdf','-processado.pdf'), "PDF" ,resolution=100.0, quality=95, save_all=True, append_images=image_list)
-        pages = convert_from_path(data['arquivo'].replace('.pdf','-processado.pdf'), dpi = 100)
+        
+        str_processado = '-procassin'+datetime.now().strftime('%d%m%Y%H%M%S')
+        first.save(data['arquivo'].replace('.pdf',str_processado+'.pdf'), "PDF" ,resolution=100.0, quality=95, save_all=True, append_images=image_list)
+        pages = convert_from_path(data['arquivo'].replace('.pdf',str_processado+'.pdf'), dpi = 100)
 
         response = app.response_class(
             response=json.dumps({"arquivo": data['arquivo'].replace('.pdf','-processado.pdf'),"quantidade":str(len(pages))}),
